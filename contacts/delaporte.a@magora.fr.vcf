@@ -1,10 +1,5 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
-FN:Aude DE LA PORTE
-N:DE LA PORTE;Aude;;;
-ORG:HOLDING TOURISME;Direction du Marketing
 TITLE:Directeur marketing\, communication & digital
-EMAIL;TYPE=INTERNET,WORK:delaporte.a@magora.fr
-TEL;TYPE=CELL:0662947866
 END:VCARD
