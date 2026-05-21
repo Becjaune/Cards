@@ -5,6 +5,9 @@ FN:Geoffrey LAVIELLE
 N:LAVIELLE;Geoffrey;;;
 ORG:MAGORA;Direction générale Groupe Magora
 TITLE:Directeur général
+X-OFFICE:Siège & Bureaux
 EMAIL;TYPE=INTERNET,WORK:lavielle.g@magora.fr
 TEL;TYPE=CELL:0670274312
+TEL;TYPE=WORK,VOICE:0670274312
+ADR;TYPE=WORK:;;655 rue René Descartes;AIX-EN-PROVENCE;;13290;
 END:VCARD
