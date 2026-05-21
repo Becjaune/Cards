@@ -9,11 +9,11 @@
 
 .EXAMPLE
   # uniquement les .vcf, et on garde l'extension dans l'URL
-  .\New-QRCode.ps1 -SourceDir ".\Cards" -OutputDir ".\qrcodes" -Filter "*.vcf" -UseFullFileName -AutoDownload
+  .\New-QRCode.ps1 -SourceDir ".\contacts" -OutputDir ".\qrcodes" -Filter "*.vcf" -UseFullFileName -AutoDownload
 
 .EXAMPLE
   # sous-dossiers inclus, correction d'erreur haute, overwrite
-  .\New-QRCode.ps1 -SourceDir ".\Cards" -OutputDir ".\qrcodes" -Recurse -ErrorCorrectionLevel H -Force -AutoDownload
+  .\New-QRCode.ps1 -SourceDir ".\contacts" -OutputDir ".\qrcodes" -Recurse -ErrorCorrectionLevel H -Force -AutoDownload
 #>
 
 [CmdletBinding()]
