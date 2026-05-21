@@ -21,11 +21,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Ensure-Dir([string]$Path) {
+function New-Directory([string]$Path) {
   if (-not (Test-Path $Path)) { New-Item -ItemType Directory -Path $Path | Out-Null }
 }
 
-function Escape-VCardValue([string]$s) {
+function ConvertTo-VCardValue([string]$s) {
   if ([string]::IsNullOrWhiteSpace($s)) { return "" }
   # vCard escaping (3.0) : \, ; , et sauts de ligne
   $s = $s -replace "\\","\\\\"
@@ -40,18 +40,18 @@ function Escape-VCardValue([string]$s) {
 function New-VCardFromUser($u, [byte[]]$photoBytes) {
   $crlf = "`r`n"
 
-  $fn        = Escape-VCardValue($u.DisplayName)
-  $given     = Escape-VCardValue($u.GivenName)
-  $surname   = Escape-VCardValue($u.Surname)
-  $jobTitle  = Escape-VCardValue($u.JobTitle)
-  $dept      = Escape-VCardValue($u.Department)
-  $company   = Escape-VCardValue($u.CompanyName)
-  $office    = Escape-VCardValue($u.OfficeLocation)
+  $fn        = Encode-VCardValue($u.DisplayName)
+  $given     = Encode-VCardValue($u.GivenName)
+  $surname   = Encode-VCardValue($u.Surname)
+  $jobTitle  = Encode-VCardValue($u.JobTitle)
+  $dept      = Encode-VCardValue($u.Department)
+  $company   = Encode-VCardValue($u.CompanyName)
+  $office    = Encode-VCardValue($u.OfficeLocation)
 
-  $email     = Escape-VCardValue($u.Mail)
-  if ([string]::IsNullOrWhiteSpace($email)) { $email = Escape-VCardValue($u.UserPrincipalName) }
+  $email     = Encode-VCardValue($u.Mail)
+  if ([string]::IsNullOrWhiteSpace($email)) { $email = Encode-VCardValue($u.UserPrincipalName) }
 
-  $mobile    = Escape-VCardValue($u.MobilePhone)
+  $mobile    = Encode-VCardValue($u.MobilePhone)
   $bizPhones = @()
   if ($u.BusinessPhones) { $bizPhones = $u.BusinessPhones | ForEach-Object { Escape-VCardValue($_) } }
 
