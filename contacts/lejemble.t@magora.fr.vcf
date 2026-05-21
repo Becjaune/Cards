@@ -1,13 +1,5 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
-UID:412f7232-915d-4e90-9f2a-a21be8400a38
-FN:Thomas LEJEMBLE
 N:LEJEMBLE;Thomas;;;
-ORG:HOLDING TOURISME;Direction du Développement
-TITLE:Directeur du développement
-X-OFFICE:Siège & Bureaux
-EMAIL;TYPE=INTERNET,WORK:lejemble.t@magora.fr
-TEL;TYPE=CELL:06 46 18 55 77
-ADR;TYPE=WORK:;;655 rue René Descartes;AIX-EN-PROVENCE;;13290;
 END:VCARD

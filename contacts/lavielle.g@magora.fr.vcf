@@ -1,14 +1,5 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
-UID:3cb5030a-21eb-44f4-acbf-b7cacb75300c
-FN:Geoffrey LAVIELLE
 N:LAVIELLE;Geoffrey;;;
-ORG:HOLDING TOURISME;Direction générale Groupe Magora
-TITLE:Directeur général
-X-OFFICE:Siège & Bureaux
-EMAIL;TYPE=INTERNET,WORK:lavielle.g@magora.fr
-TEL;TYPE=CELL:0670274312
-TEL;TYPE=WORK,VOICE:0670274312
-ADR;TYPE=WORK:;;655 rue René Descartes;AIX-EN-PROVENCE;;13290;
 END:VCARD

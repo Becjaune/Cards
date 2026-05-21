@@ -1,14 +1,5 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
-UID:0f224e0c-b098-473e-955e-9f4239677b52
-FN:Isabelle FRIGIERE
 N:FRIGIERE;Isabelle;;;
-ORG:HOLDING TOURISME;Direction des Ressources Humaines
-TITLE:Directeur des ressources humaines
-X-OFFICE:Siège & Bureaux
-EMAIL;TYPE=INTERNET,WORK:frigiere.i@magora.fr
-TEL;TYPE=CELL:0651655133
-TEL;TYPE=WORK,VOICE:0442258808
-ADR;TYPE=WORK:;;655 rue René Descartes;AIX-EN-PROVENCE;;13290;France
 END:VCARD

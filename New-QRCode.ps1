@@ -1,21 +1,26 @@
 <#
 .SYNOPSIS
-  Génère en lot des QR codes à partir d'un fichier de lignes.
-  URL = BaseUrl + Line
-  Nom fichier = Line.png (ou .svg)
+  Génère des QR codes en lot à partir des fichiers présents dans un dossier.
+  URL = BaseUrl + (nom du fichier sans extension par défaut)
+  Nom du QR = (nom du fichier sans extension).png (ou .svg)
 
 .EXAMPLE
-  .\New-QRCodeBatch.ps1 -InputFile .\codes.txt -OutputDir .\qrcodes -AutoDownload
+  .\New-QRCode.ps1 -SourceDir ".\contacts" -OutputDir ".\qrcodes" -AutoDownload
 
 .EXAMPLE
-  .\New-QRCode.ps1 -InputFile .\comex.txt -OutputDir .\qrcodes -Format svg -AutoDownload
+  # uniquement les .vcf, et on garde l'extension dans l'URL
+  .\New-QRCode.ps1 -SourceDir ".\Cards" -OutputDir ".\qrcodes" -Filter "*.vcf" -UseFullFileName -AutoDownload
+
+.EXAMPLE
+  # sous-dossiers inclus, correction d'erreur haute, overwrite
+  .\New-QRCode.ps1 -SourceDir ".\Cards" -OutputDir ".\qrcodes" -Recurse -ErrorCorrectionLevel H -Force -AutoDownload
 #>
 
 [CmdletBinding()]
 param(
   [Parameter(Mandatory)]
   [ValidateNotNullOrEmpty()]
-  [string]$InputFile,
+  [string]$SourceDir,
 
   [Parameter(Mandatory)]
   [ValidateNotNullOrEmpty()]
@@ -23,7 +28,16 @@ param(
 
   [Parameter()]
   [ValidateNotNullOrEmpty()]
-  [string]$BaseUrl = "https://becjaune.github.io/Cards/",
+  [string]$BaseUrl = "https://becjaune.github.io/Cards/contacts/",
+
+  # Filtre de fichiers (ex: "*.html", "*.vcf", "*.json"). Par défaut: tous les fichiers
+  [string]$Filter = "*.*",
+
+  # Inclure sous-dossiers
+  [switch]$Recurse,
+
+  # Par défaut on utilise le nom sans extension (BaseName). Si activé -> on utilise le nom complet (FileName.ext)
+  [switch]$UseFullFileName,
 
   [ValidateSet("png","svg")]
   [string]$Format = "png",
@@ -34,24 +48,24 @@ param(
   [ValidateSet("L","M","Q","H")]
   [string]$ErrorCorrectionLevel = "M",
 
+  # Téléchargement auto de QRCoder (NuGet) si la DLL n'est pas déjà localement disponible
   [switch]$AutoDownload,
 
-  # si une ligne contient des caractères non valides pour un nom de fichier,
-  # on les remplace par "_"
+  # Remplace les caractères invalides pour Windows dans le nom du fichier du QR
   [switch]$SanitizeFileName,
 
-  # génère un manifest CSV avec line/url/file/status
-  [switch]$WriteManifest,
+  # Overwrite si existe
+  [switch]$Force,
 
-  # si le fichier existe déjà : overwrite
-  [switch]$Force
+  # Exporter un manifest CSV (nom/url/fichier/status)
+  [switch]$WriteManifest
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 function Ensure-Dir([string]$Path) {
-  if (-not (Test-Path $Path)) { New-Item -ItemType Directory -Path $Path | Out-Null }
+  if (-not (Test-Path $Path)) { New-Item -ItemType Directory -Force -Path $Path | Out-Null }
 }
 
 function Resolve-QRCoderAssembly {
@@ -105,36 +119,46 @@ function Map-EccLevel([string]$level) {
 
 function Get-SafeFileName([string]$name, [switch]$sanitize) {
   if (-not $sanitize) { return $name }
-  # remplace tout caractère interdit Windows par "_"
   return ($name -replace '[<>:"/\\|?*\x00-\x1F]', '_')
 }
 
-# ---- Validations ----
-if (-not (Test-Path $InputFile)) { throw "InputFile introuvable: $InputFile" }
+# ---- Validations
+if (-not (Test-Path $SourceDir)) { throw "SourceDir introuvable: $SourceDir" }
 Ensure-Dir $OutputDir
 
-# ---- Load QRCoder ----
+# ---- Load QRCoder
 $dll = Resolve-QRCoderAssembly -AutoDownload:$AutoDownload
 Add-Type -Path $dll
 
 $generator = New-Object QRCoder.QRCodeGenerator
 $ecc = Map-EccLevel $ErrorCorrectionLevel
 
-# ---- Read lines ----
-$lines = Get-Content $InputFile | ForEach-Object { $_.Trim() } | Where-Object { $_ -and -not $_.StartsWith("#") }
-$lines = @($lines)  # force array
+# ---- Get files
+$gciParams = @{
+  Path   = $SourceDir
+  Filter = $Filter
+  File   = $true
+}
+if ($Recurse) { $gciParams.Recurse = $true }
 
-Write-Host "Lignes à traiter: $($lines.Count)" -ForegroundColor Cyan
+$files = Get-ChildItem @gciParams
+$files = @($files) # force array
+
+Write-Host "Fichiers trouvés: $($files.Count)" -ForegroundColor Cyan
 Write-Host "BaseUrl: $BaseUrl" -ForegroundColor Cyan
 Write-Host "Sortie: $OutputDir ($Format)" -ForegroundColor Cyan
 
 $manifest = New-Object System.Collections.Generic.List[object]
 
-foreach ($line in $lines) {
-  $safeName = Get-SafeFileName -name $line -sanitize:$SanitizeFileName
-  $url = "$BaseUrl$line"
+foreach ($f in $files) {
+  $suffix = if ($UseFullFileName) { $f.Name } else { $f.BaseName }
 
-  $outPath = Join-Path $OutputDir ($safeName + "." + $Format)
+  # Si le suffixe contient des espaces/accents, c'est généralement OK dans une URL, mais selon ton site
+  # tu peux vouloir encoder. Dis-moi si besoin -> j'ajoute l'URL encoding.
+  $url = "$BaseUrl$suffix"
+
+  $safeSuffix = Get-SafeFileName -name $suffix -sanitize:$SanitizeFileName
+  $outPath = Join-Path $OutputDir ($safeSuffix + "." + $Format)
 
   try {
     if ((Test-Path $outPath) -and -not $Force) {
@@ -160,21 +184,27 @@ foreach ($line in $lines) {
       Write-Host "OK : $outPath  <=  $url" -ForegroundColor Green
     }
 
-    $manifest.Add([pscustomobject]@{
-      Line   = $line
-      Url    = $url
-      File   = $outPath
-      Status = $status
-    }) | Out-Null
+    if ($WriteManifest) {
+      $manifest.Add([pscustomobject]@{
+        SourceFile = $f.FullName
+        Suffix     = $suffix
+        Url        = $url
+        QrFile     = $outPath
+        Status     = $status
+      }) | Out-Null
+    }
 
   } catch {
-    Write-Host "ERROR sur '$line' : $($_.Exception.Message)" -ForegroundColor Red
-    $manifest.Add([pscustomobject]@{
-      Line   = $line
-      Url    = $url
-      File   = $outPath
-      Status = "error: $($_.Exception.Message)"
-    }) | Out-Null
+    Write-Host "ERROR sur '$($f.FullName)' : $($_.Exception.Message)" -ForegroundColor Red
+    if ($WriteManifest) {
+      $manifest.Add([pscustomobject]@{
+        SourceFile = $f.FullName
+        Suffix     = $suffix
+        Url        = $url
+        QrFile     = $outPath
+        Status     = "error: $($_.Exception.Message)"
+      }) | Out-Null
+    }
   }
 }
 

@@ -14,6 +14,9 @@ param(
   [Parameter(Mandatory=$true)]
   [string]$OutputDir,
 
+  [string[]]$IncludeFields,       # liste optionnelle des champs à inclure explicitement ; si précisé, seules ces propriétés sont écrites
+  [string[]]$ExcludeFields,       # liste optionnelle des champs à exclure (ex: JobTitle,Department,Company,Office,Email,Mobile,BusinessPhones,Address,UID,FN)
+
   [switch]$IncludePhoto,          # désactivé par défaut
   [switch]$ForceOverwrite         # force l’écriture même si identique
 )
@@ -43,6 +46,16 @@ function Escape-VCardValue([string]$s) {
 
 function Encode-VCardValue([string]$s) {
   ConvertTo-VCardValue $s
+}
+
+function ShouldIncludeField([string]$fieldName) {
+  if ($IncludeFields -and $IncludeFields.Count -gt 0) {
+    return $IncludeFields -contains $fieldName
+  }
+  if ($ExcludeFields -and $ExcludeFields.Count -gt 0) {
+    return -not ($ExcludeFields -contains $fieldName)
+  }
+  return $true
 }
 
 function New-VCardFromUser($u, [byte[]]$photoBytes) {
@@ -76,30 +89,37 @@ function New-VCardFromUser($u, [byte[]]$photoBytes) {
   $lines.Add("BEGIN:VCARD")
   $lines.Add("VERSION:3.0")
   $lines.Add("PRODID:-//Magora//VCF Exporter//FR")
-  if ($uid) { $lines.Add("UID:$uid") }
-  if ($fn)  { $lines.Add("FN:$fn") }
-  $lines.Add("N:$surname;$given;;;")
+  if ($uid -and (ShouldIncludeField "UID")) { $lines.Add("UID:$uid") }
+  if ($fn -and (ShouldIncludeField "FN"))  { $lines.Add("FN:$fn") }
+  if (ShouldIncludeField "N") { $lines.Add("N:$surname;$given;;;") }
 
-  if ($company -or $dept) {
-    # ORG peut contenir des niveaux séparés par ';'
-    # on met CompanyName ; Department
-    $org = "$company;$dept"
+  # ORG: allow including/excluding Company and Department separately
+  $includeCompany = ShouldIncludeField("Company")
+  $includeDept    = ShouldIncludeField("Department")
+  if (($company -and $includeCompany) -or ($dept -and $includeDept)) {
+    $orgCompany = if ($includeCompany) { $company } else { "" }
+    $orgDept    = if ($includeDept)    { $dept }    else { "" }
+    $org = "$orgCompany;$orgDept"
     $org = $org.Trim(";")
     $lines.Add("ORG:$org")
   }
 
-  if ($jobTitle) { $lines.Add("TITLE:$jobTitle") }
-  if ($office)   { $lines.Add("X-OFFICE:$office") }
+  if ($jobTitle -and (ShouldIncludeField "JobTitle")) { $lines.Add("TITLE:$jobTitle") }
+  if ($office   -and (ShouldIncludeField "Office"))    { $lines.Add("X-OFFICE:$office") }
 
-  if ($email)    { $lines.Add("EMAIL;TYPE=INTERNET,WORK:$email") }
-  if ($mobile)   { $lines.Add("TEL;TYPE=CELL:$mobile") }
-  foreach ($bp in $bizPhones) {
-    if ($bp) { $lines.Add("TEL;TYPE=WORK,VOICE:$bp") }
+  if ($email  -and (ShouldIncludeField "Email"))  { $lines.Add("EMAIL;TYPE=INTERNET,WORK:$email") }
+  if ($mobile -and (ShouldIncludeField "Mobile")) { $lines.Add("TEL;TYPE=CELL:$mobile") }
+  if (ShouldIncludeField "BusinessPhones") {
+    foreach ($bp in $bizPhones) {
+      if ($bp) { $lines.Add("TEL;TYPE=WORK,VOICE:$bp") }
+    }
   }
 
-  if ($street -or $city -or $state -or $zip -or $country) {
-    # ADR;TYPE=WORK:;;street;city;state;zip;country
-    $lines.Add("ADR;TYPE=WORK:;;$street;$city;$state;$zip;$country")
+  if (ShouldIncludeField "Address") {
+    if ($street -or $city -or $state -or $zip -or $country) {
+      # ADR;TYPE=WORK:;;street;city;state;zip;country
+      $lines.Add("ADR;TYPE=WORK:;;$street;$city;$state;$zip;$country")
+    }
   }
 
   if ($IncludePhoto -and $photoBytes -and $photoBytes.Length -gt 0) {
