@@ -1,0 +1,14 @@
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Magora//VCF Exporter//FR
+UID:9071736e-2087-4526-9295-683043cbce40
+FN:Aude DE LA PORTE
+N:DE LA PORTE;Aude;;;
+ORG:HOLDING TOURISME;Direction du Marketing
+TITLE:Directeur marketing\, communication & digital
+X-OFFICE:Siège & Bureaux
+EMAIL;TYPE=INTERNET,WORK:delaporte.a@magora.fr
+TEL;TYPE=CELL:0662947866
+TEL;TYPE=WORK,VOICE:0662947866
+ADR;TYPE=WORK:;;2 rue de la Roquette - Passage du Cheval Blanc\, Cour de Mai;PARIS;;75011;
+END:VCARD

@@ -1,0 +1,12 @@
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Magora//VCF Exporter//FR
+UID:facc7ed7-e8c9-49a3-8878-774336350dae
+FN:Johanna AMBIL
+N:AMBIL;Johanna;;;
+ORG:HOLDING TOURISME;Direction Générale VACANCES
+TITLE:Directrice Générale Odalys Vacances
+X-OFFICE:Siège & Bureaux
+EMAIL;TYPE=INTERNET,WORK:ambil.j@odalys-vacances.com
+TEL;TYPE=CELL:0613922641
+END:VCARD
