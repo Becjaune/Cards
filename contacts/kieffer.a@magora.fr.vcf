@@ -1,5 +1,10 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
+FN:Antoine KIEFFER
 N:KIEFFER;Antoine;;;
+ORG:HOLDING TOURISME;Odalys Groupe
+TITLE:Directeur juridique/Directeur général adjoint
+EMAIL;TYPE=INTERNET,WORK:kieffer.a@magora.fr
+TEL;TYPE=CELL:0609245227
 END:VCARD

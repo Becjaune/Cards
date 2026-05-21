@@ -48,12 +48,46 @@ function Encode-VCardValue([string]$s) {
   ConvertTo-VCardValue $s
 }
 
+function NormalizeFieldName([string]$fieldName) {
+  if (-not $fieldName) { return $null }
+  switch ($fieldName.Trim().ToLowerInvariant()) {
+    'fn' { 'FN' }
+    'n' { 'N' }
+    'displayname' { 'FN' }
+    'name' { 'FN' }
+    'email' { 'Email' }
+    'mail' { 'Email' }
+    'userprincipalname' { 'Email' }
+    'jobtitle' { 'JobTitle' }
+    'department' { 'Department' }
+    'company' { 'Company' }
+    'companyname' { 'Company' }
+    'office' { 'Office' }
+    'officelocation' { 'Office' }
+    'mobile' { 'Mobile' }
+    'businessphones' { 'BusinessPhones' }
+    'phones' { 'BusinessPhones' }
+    'address' { 'Address' }
+    'uid' { 'UID' }
+    default { $fieldName.Trim() }
+  }
+}
+
+function FieldSetContains([string[]]$set, [string]$fieldName) {
+  if (-not $set) { return $false }
+  $normalized = NormalizeFieldName $fieldName
+  foreach ($item in $set) {
+    if ((NormalizeFieldName $item) -eq $normalized) { return $true }
+  }
+  return $false
+}
+
 function ShouldIncludeField([string]$fieldName) {
   if ($IncludeFields -and $IncludeFields.Count -gt 0) {
-    return $IncludeFields -contains $fieldName
+    return FieldSetContains $IncludeFields $fieldName
   }
   if ($ExcludeFields -and $ExcludeFields.Count -gt 0) {
-    return -not ($ExcludeFields -contains $fieldName)
+    return -not (FieldSetContains $ExcludeFields $fieldName)
   }
   return $true
 }
@@ -64,6 +98,7 @@ function New-VCardFromUser($u, [byte[]]$photoBytes) {
   $fn        = Encode-VCardValue($u.DisplayName)
   $given     = Encode-VCardValue($u.GivenName)
   $surname   = Encode-VCardValue($u.Surname)
+  if ([string]::IsNullOrWhiteSpace($fn)) { $fn = ($given + ' ' + $surname).Trim() }
   $jobTitle  = Encode-VCardValue($u.JobTitle)
   $dept      = Encode-VCardValue($u.Department)
   $company   = Encode-VCardValue($u.CompanyName)

@@ -1,5 +1,10 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
+FN:Geoffrey LAVIELLE
 N:LAVIELLE;Geoffrey;;;
+ORG:HOLDING TOURISME;Direction générale Groupe Magora
+TITLE:Directeur général
+EMAIL;TYPE=INTERNET,WORK:lavielle.g@magora.fr
+TEL;TYPE=CELL:0670274312
 END:VCARD

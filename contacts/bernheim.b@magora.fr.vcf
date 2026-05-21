@@ -1,5 +1,10 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
+FN:Benjamin BERNHEIM
 N:BERNHEIM;Benjamin;;;
+ORG:HOLDING TOURISME;Direction financière
+TITLE:Directeur administratif et financier
+EMAIL;TYPE=INTERNET,WORK:bernheim.b@magora.fr
+TEL;TYPE=CELL:0674129421
 END:VCARD
