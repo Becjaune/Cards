@@ -3,10 +3,8 @@ VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
 FN:Laurent LEMERLE
 N:LEMERLE;Laurent;;;
-ORG:MAGORA;Direction des Systèmes Informations
+ORG:MAGORA
 TITLE:Directeur des systèmes d'information
-X-OFFICE:Siège & Bureaux
 EMAIL;TYPE=INTERNET,WORK:lemerle.l@magora.fr
 TEL;TYPE=CELL:0611753189
-ADR;TYPE=WORK:;;655 rue René Descartes;AIX-EN-PROVENCE;;13290;
 END:VCARD
