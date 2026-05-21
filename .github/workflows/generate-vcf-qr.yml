@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "0 3 * * *"   # tous les jours à 03h (UTC)
   workflow_dispatch:       # permet de lancer à la main
+  
+permissions:
+  contents: write
 
 jobs:
   build:
