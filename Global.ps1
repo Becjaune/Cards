@@ -12,6 +12,8 @@
 #-IncludeFields "FN","N","Email","Mobile","Address" `
 # Accepted aliases include: Mail, UserPrincipalName, DisplayName, CompanyName, OfficeLocation, Phones
 
+.\New-QRCode.ps1 -SourceDir ".\contacts" -OutputDir ".\qrcodes" -Filter "*.vcf" -UseFullFileName -AutoDownload
+
 #2. Push git
 
 git add .
