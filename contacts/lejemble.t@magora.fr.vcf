@@ -1,5 +1,10 @@
 BEGIN:VCARD
 VERSION:3.0
 PRODID:-//Magora//VCF Exporter//FR
+FN:Thomas LEJEMBLE
+N:LEJEMBLE;Thomas;;;
+ORG:MAGORA;Direction du Développement
 TITLE:Directeur du développement
+EMAIL;TYPE=INTERNET,WORK:lejemble.t@magora.fr
+TEL;TYPE=CELL:06 46 18 55 77
 END:VCARD
