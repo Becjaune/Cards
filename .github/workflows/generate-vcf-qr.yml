@@ -7,23 +7,40 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
-
+    runs-on: windows-2022
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Run QR code generation
-      shell: pwsh
-      run: |
-        ./scripts/Global.ps1 `
+      - name: Import Graph certificate (PFX) into CurrentUser store
+        shell: pwsh
+        env:
+          PFX_B64: ${{ secrets.GRAPH_CERT_PFX_B64 }}
+          PFX_PWD: ${{ secrets.GRAPH_CERT_PFX_PASSWORD }}
+        run: |
+          $pfxPath = Join-Path $env:RUNNER_TEMP "graphapp.pfx"
+          [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:PFX_B64))
 
-    - name: Commit & push if changes
-      run: |
-        git config user.name "github-actions"
-        git config user.email "actions@github.com"
-        git add .
-        if (git status --porcelain) {
-          git commit -m "Auto update QR codes"
-          git push
-        }
+          $sec = ConvertTo-SecureString $env:PFX_PWD -AsPlainText -Force
+          $imported = Import-PfxCertificate -FilePath $pfxPath -CertStoreLocation "Cert:\CurrentUser\My" -Password $sec
+
+          Write-Host "Imported thumbprint: $($imported.Thumbprint)"
+          "GRAPH_CERT_THUMBPRINT=$($imported.Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Run VCF update
+        shell: pwsh
+        env:
+          TenantId:  ${{ secrets.GRAPH_TENANT_ID }}
+          ClientId:  ${{ secrets.GRAPH_CLIENT_ID }}
+          Thumbprint: ${{ env.GRAPH_CERT_THUMBPRINT }}
+        run: |
+          ./scripts/Global.ps1 `
+          
+      - name: Commit & push if changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          if (git status --porcelain) {
+            git commit -m "Auto update QR codes"
+            git push
+          }
