@@ -37,6 +37,14 @@ function ConvertTo-VCardValue([string]$s) {
   return $s
 }
 
+function Escape-VCardValue([string]$s) {
+  ConvertTo-VCardValue $s
+}
+
+function Encode-VCardValue([string]$s) {
+  ConvertTo-VCardValue $s
+}
+
 function New-VCardFromUser($u, [byte[]]$photoBytes) {
   $crlf = "`r`n"
 
