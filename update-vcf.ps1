@@ -101,7 +101,7 @@ function New-VCardFromUser($u, [byte[]]$photoBytes) {
   if ([string]::IsNullOrWhiteSpace($fn)) { $fn = ($given + ' ' + $surname).Trim() }
   $jobTitle  = Encode-VCardValue($u.JobTitle)
   $dept      = Encode-VCardValue($u.Department)
-  $company   = Encode-VCardValue($u.CompanyName)
+  $company   = "MAGORA" #Encode-VCardValue($u.CompanyName)
   $office    = Encode-VCardValue($u.OfficeLocation)
 
   $email     = Encode-VCardValue($u.Mail)
