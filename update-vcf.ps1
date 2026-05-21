@@ -106,7 +106,7 @@ function New-VCardFromUser($u, [byte[]]$photoBytes) {
   return ($lines -join $crlf) + $crlf
 }
 
-Ensure-Dir $OutputDir
+New-Directory $OutputDir
 
 Write-Host "Connecting to Microsoft Graph (App-Only)..." -ForegroundColor Cyan
 Connect-MgGraph -TenantId $TenantId -ClientId $ClientId -CertificateThumbprint $CertThumbprint | Out-Null
