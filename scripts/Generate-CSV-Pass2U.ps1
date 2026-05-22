@@ -73,7 +73,7 @@ foreach ($vcf in Get-ChildItem -Path $contactsDir -Filter '*.vcf' -File) {
     $rows += [PSCustomObject]@{
         'barcode' = "https://becjaune.github.io/Cards/contacts/$($vcf.Name)"
         'expirationDate' = ''
-        'Name(Nom)' = if ($contact) { $contact.Name } else { '' }
+        'Nom(Nom)' = if ($contact) { $contact.Name } else { '' }
         'Mobile(Mobile)' = if ($contact) { $contact.Mobile } else { '' }
         'Email(Email)' = if ($contact) { $contact.Email } else { $emailKey }
         'Role()' = ''
