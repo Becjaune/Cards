@@ -58,7 +58,13 @@ param(
   [switch]$Force,
 
   # Exporter un manifest CSV (nom/url/fichier/status)
-  [switch]$WriteManifest
+  [switch]$WriteManifest,
+
+  # Générer le CSV contacts demandé
+  [switch]$WriteContactsCsv,
+
+  # Chemin du fichier upns.txt pour enrichir les contacts
+  [string]$UpnsFile = (Join-Path (Split-Path $PSScriptRoot -Parent) "upns.txt")
 )
 
 Set-StrictMode -Version Latest
@@ -120,6 +126,32 @@ function Map-EccLevel([string]$level) {
 function Get-SafeFileName([string]$name, [switch]$sanitize) {
   if (-not $sanitize) { return $name }
   return ($name -replace '[<>:"/\\|?*\x00-\x1F]', '_')
+}
+
+function Parse-VCard([string]$Path) {
+  $content = Get-Content -Path $Path -ErrorAction Stop
+  $contact = [PSCustomObject]@{
+    Email = ""
+    Name  = ""
+    Mobile = ""
+  }
+
+  foreach ($line in $content) {
+    if ($line -match '^FN:(.+)$') {
+      $contact.Name = $matches[1].Trim()
+    } elseif ($line -match '^EMAIL[^:]*:(.+)$') {
+      if (-not $contact.Email) { $contact.Email = $matches[1].Trim() }
+    } elseif ($line -match '^TEL[^:]*:(.+)$') {
+      if (-not $contact.Mobile) { $contact.Mobile = $matches[1].Trim() }
+    }
+  }
+
+  return $contact
+}
+
+function Ensure-TrailingSlash([string]$Url) {
+  if (-not $Url.EndsWith('/')) { return $Url + '/' }
+  return $Url
 }
 
 # ---- Validations
@@ -212,6 +244,57 @@ if ($WriteManifest) {
   $manifestPath = Join-Path $OutputDir ("qrcode-manifest-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".csv")
   $manifest | Export-Csv -NoTypeInformation -Encoding UTF8 $manifestPath
   Write-Host "Manifest: $manifestPath" -ForegroundColor Cyan
+}
+
+if ($WriteContactsCsv) {
+  if (-not (Test-Path $UpnsFile)) { throw "UpnsFile introuvable: $UpnsFile" }
+
+  $BaseUrl = Ensure-TrailingSlash $BaseUrl
+  $upns = Get-Content -Path $UpnsFile | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+  $upnsSet = @{}
+  foreach ($upn in $upns) {
+    $upnsSet[$upn.ToLower()] = $true
+  }
+
+  $vcfParams = @{ Path = $SourceDir; Filter = '*.vcf'; File = $true }
+  if ($Recurse) { $vcfParams.Recurse = $true }
+  $vcfFiles = Get-ChildItem @vcfParams
+
+  $contacts = @{}
+  foreach ($vcf in $vcfFiles) {
+    $info = Parse-VCard $vcf.FullName
+    if ($info.Email) { $contacts[$info.Email.ToLower()] = $info }
+  }
+
+  $qrParams = @{ Path = $OutputDir; Filter = "*.$Format"; File = $true }
+  $qrFiles = Get-ChildItem @qrParams | Sort-Object @{ Expression = { $_.Name -like '*.vcf.*' }; Descending = $true }
+  $seen = @{}
+
+  $rows = foreach ($qrFile in $qrFiles) {
+    $name = $qrFile.BaseName
+    if ($name.EndsWith('.vcf')) { $name = $name.Substring(0, $name.Length - 4) }
+
+    $emailKey = $name.ToLower()
+    if (($upnsSet.Count -gt 0) -and -not $upnsSet.ContainsKey($emailKey)) { continue }
+    if ($seen.ContainsKey($emailKey)) { continue }
+    $seen[$emailKey] = $true
+
+    $contact = $null
+    if ($contacts.ContainsKey($emailKey)) { $contact = $contacts[$emailKey] }
+
+    [PSCustomObject]@{
+      barcode = "$BaseUrl$($qrFile.Name)"
+      expirationDate = ''
+      'Name(Nom)' = if ($contact) { $contact.Name } else { '' }
+      'Mobile(Mobile)' = if ($contact) { $contact.Mobile } else { '' }
+      'Email(Email)' = if ($contact) { $contact.Email } else { $name }
+      'Role()' = ''
+    }
+  }
+
+  $csvPath = Join-Path $OutputDir ("qrcode-contacts-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".csv")
+  $rows | Export-Csv -NoTypeInformation -Encoding UTF8 $csvPath
+  Write-Host "CSV contacts: $csvPath" -ForegroundColor Cyan
 }
 
 Write-Host "Terminé ✅" -ForegroundColor Green
