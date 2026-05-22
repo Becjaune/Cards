@@ -28,7 +28,7 @@ param(
 
   [Parameter()]
   [ValidateNotNullOrEmpty()]
-  [string]$BaseUrl = "https://becjaune.github.io/Cards/contacts/",
+  [string]$BaseUrl = "https://becjaune.github.io/Cards/qrcodes/",
 
   # Filtre de fichiers (ex: "*.html", "*.vcf", "*.json"). Par défaut: tous les fichiers
   [string]$Filter = "*.*",
