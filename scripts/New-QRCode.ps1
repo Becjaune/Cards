@@ -295,7 +295,14 @@ if ($WriteContactsCsv) {
 
   $csvPath = Join-Path $OutputDir ("qrcode-contacts-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".csv")
   $rows | Export-Csv -NoTypeInformation -Encoding UTF8 $csvPath
-  Write-Host "CSV contacts: $csvPath" -ForegroundColor Cyan
+  # Add UTF-8 BOM if missing so apps that expect a BOM (like some mobile importers)
+  # will correctly detect UTF-8 and display accents (e.g. "Stéphane").
+  $bytes = [System.IO.File]::ReadAllBytes($csvPath)
+  if (($bytes.Length -lt 3) -or -not ($bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)) {
+    $bom = [byte[]](0xEF,0xBB,0xBF)
+    [System.IO.File]::WriteAllBytes($csvPath, $bom + $bytes)
+  }
+  Write-Host "CSV contacts: $csvPath (with UTF-8 BOM)" -ForegroundColor Cyan
 }
 
 Write-Host "Terminé ✅" -ForegroundColor Green
