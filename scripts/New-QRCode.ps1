@@ -28,7 +28,7 @@ param(
 
   [Parameter()]
   [ValidateNotNullOrEmpty()]
-  [string]$BaseUrl = "https://becjaune.github.io/Cards/qrcodes/",
+  [string]$BaseUrl = "https://becjaune.github.io/Cards/contacts/",
 
   # Filtre de fichiers (ex: "*.html", "*.vcf", "*.json"). Par défaut: tous les fichiers
   [string]$Filter = "*.*",
@@ -250,6 +250,7 @@ if ($WriteContactsCsv) {
   if (-not (Test-Path $UpnsFile)) { throw "UpnsFile introuvable: $UpnsFile" }
 
   $BaseUrl = Ensure-TrailingSlash $BaseUrl
+  $QrCodesBaseUrl = Ensure-TrailingSlash "https://becjaune.github.io/Cards/qrcodes/"
   $upns = Get-Content -Path $UpnsFile | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
   $upnsSet = @{}
   foreach ($upn in $upns) {
@@ -283,7 +284,7 @@ if ($WriteContactsCsv) {
     if ($contacts.ContainsKey($emailKey)) { $contact = $contacts[$emailKey] }
 
     [PSCustomObject]@{
-      barcode = "$BaseUrl$($qrFile.Name)"
+      barcode = "$QrCodesBaseUrl$($qrFile.Name)"
       expirationDate = ''
       'Name(Nom)' = if ($contact) { $contact.Name } else { '' }
       'Mobile(Mobile)' = if ($contact) { $contact.Mobile } else { '' }
