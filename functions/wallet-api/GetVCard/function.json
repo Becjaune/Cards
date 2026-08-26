@@ -1,0 +1,26 @@
+{
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "Request",
+      "methods": ["get"],
+      "route": "vcard/{id}"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "Response"
+    },
+    {
+      "type": "table",
+      "direction": "in",
+      "name": "vCardEntity",
+      "tableName": "%VCARD_TABLE_NAME%",
+      "partitionKey": "vcard",
+      "rowKey": "{id}",
+      "connection": "AzureWebJobsStorage"
+    }
+  ]
+}

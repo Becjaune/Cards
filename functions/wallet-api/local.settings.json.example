@@ -1,0 +1,16 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "powershell",
+
+    "ALLOWED_ORIGIN": "https://becjaune.github.io",
+
+    "GRAPH_TENANT_ID": "d0ae6336-5c35-4735-9703-03fb777bbd2b",
+
+    "PASS2U_API_KEY": "REPLACE-LOCALLY-NEVER-COMMIT",
+    "PASS2U_TEMPLATE_ID": "REPLACE-LOCALLY-NEVER-COMMIT",
+
+    "VCARD_TABLE_NAME": "VCardSnapshots"
+  }
+}
